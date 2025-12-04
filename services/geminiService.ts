@@ -6,12 +6,12 @@ import type { Question, Recommendation, QuestionWithAnswer } from '../types';
  * Throws an error if the API key is not found in the environment variables.
  */
 function getAiClient(): GoogleGenAI {
-  // FIX: Use process.env.API_KEY as per the coding guidelines.
+  // Fix: The API key must be obtained from process.env.API_KEY as per the guidelines.
   const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
     // This error will be caught by the UI and displayed nicely.
-    console.error("API_KEY is not defined. Make sure it's set in your environment variables.");
+    console.error("API_KEY is not defined. Make sure it's set in your project settings.");
     throw new Error("A chave da API não foi encontrada. Verifique se a variável de ambiente API_KEY está configurada.");
   }
   
