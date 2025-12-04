@@ -6,13 +6,11 @@ import type { Question, Recommendation, QuestionWithAnswer } from '../types';
  * Throws an error if the API key is not found in the environment variables.
  */
 function getAiClient(): GoogleGenAI {
-  // FIX: Use process.env.API_KEY as per the guidelines.
   const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
-    // This error will be caught by the UI and displayed nicely.
     console.error("API_KEY is not defined. Make sure it's set in your environment variables.");
-    throw new Error("A chave da API não foi encontrada. Verifique se a variável de ambiente API_KEY está configurada.");
+    throw new Error("A chave da API não foi encontrada. Verifique as variáveis de ambiente.");
   }
   
   return new GoogleGenAI({ apiKey });
@@ -64,7 +62,8 @@ export async function generateQuizQuestions(): Promise<Question[]> {
     });
 
     try {
-        const jsonText = response.text.trim();
+        // Limpeza de segurança: remove crases de markdown caso a IA as envie (ex: ```json ... ```)
+        const jsonText = response.text.replace(/```json|```/g, '').trim();
         const questions = JSON.parse(jsonText);
         return questions as Question[];
     } catch (e) {
@@ -114,7 +113,8 @@ export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Prom
     });
 
     try {
-        const jsonText = response.text.trim();
+        // Limpeza de segurança: remove crases de markdown caso a IA as envie
+        const jsonText = response.text.replace(/```json|```/g, '').trim();
         const recommendation = JSON.parse(jsonText);
         return recommendation as Recommendation;
     } catch (e) {
