@@ -1,11 +1,26 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Question, Recommendation, QuestionWithAnswer } from '../types';
 
-// FIX: Per coding guidelines, API key must be from process.env.API_KEY and used directly in initialization.
-// This resolves the error "Property 'env' does not exist on type 'ImportMeta'".
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Creates and returns a GoogleGenAI client instance.
+ * Throws an error if the API key is not found in the environment variables.
+ */
+function getAiClient(): GoogleGenAI {
+  // Fix for line 12: Per coding guidelines, API key must be obtained exclusively from process.env.API_KEY.
+  // This also resolves the TypeScript error regarding 'import.meta.env'.
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey) {
+    // Este erro será capturado pela UI e exibido de forma amigável.
+    console.error("API_KEY is not defined. Make sure it's set in your environment variables.");
+    throw new Error("A chave da API não foi encontrada. Verifique se a variável de ambiente API_KEY está configurada.");
+  }
+  
+  return new GoogleGenAI({ apiKey });
+}
 
 export async function generateQuizQuestions(): Promise<Question[]> {
+    const ai = getAiClient();
     const prompt = `
       Você é um especialista em nutrição da página @keto_carnivoras_news, focado em dieta cetogênica e carnívora.
       Crie um quiz de 5 perguntas de múltipla escolha para ajudar um seguidor a escolher o melhor produto digital para ele.
@@ -52,12 +67,13 @@ export async function generateQuizQuestions(): Promise<Question[]> {
         const questions = JSON.parse(jsonText);
         return questions as Question[];
     } catch (e) {
-        console.error("Failed to parse Gemini response:", e);
+        console.error("Failed to parse Gemini response:", e, "Raw text:", response.text);
         throw new Error("Could not generate quiz questions.");
     }
 }
 
 export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Promise<Recommendation> {
+    const ai = getAiClient();
     const prompt = `
       Atue como o especialista da página @keto_carnivoras_news.
       Analise as respostas do usuário no quiz e recomende UM dos seguintes produtos:
@@ -101,7 +117,7 @@ export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Prom
         const recommendation = JSON.parse(jsonText);
         return recommendation as Recommendation;
     } catch (e) {
-        console.error("Failed to parse Gemini recommendation response:", e);
+        console.error("Failed to parse Gemini recommendation response:", e, "Raw text:", response.text);
         throw new Error("Could not generate recommendation.");
     }
 }
