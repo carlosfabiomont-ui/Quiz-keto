@@ -1,10 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Question, Recommendation, QuestionWithAnswer } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
+// FIX: Per coding guidelines, API key must be from process.env.API_KEY and used directly in initialization.
+// This resolves the error "Property 'env' does not exist on type 'ImportMeta'".
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function generateQuizQuestions(): Promise<Question[]> {

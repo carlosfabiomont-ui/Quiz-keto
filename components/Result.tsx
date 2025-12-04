@@ -47,10 +47,24 @@ const Result: React.FC<ResultProps> = ({ product, reason, onRestart }) => {
           href={product.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full md:max-w-md mx-auto mb-6 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black font-bold text-lg py-5 px-8 rounded-full shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-1 transition-all duration-300"
+          className="block w-full md:max-w-md mx-auto bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black font-bold text-lg py-5 px-8 rounded-full shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-1 transition-all duration-300"
         >
           ACESSAR GUIA AGORA
         </a>
+
+        {/* Bonus Section */}
+        <div className="my-12 border-t border-neutral-800 pt-10">
+            <h3 className="text-xl font-bold text-gold-gradient mb-3 uppercase tracking-wider">Bônus Especial</h3>
+            <p className="text-neutral-400 mb-6">Eleve sua jornada com nossa ferramenta de IA!</p>
+            <a 
+                href="https://app.ketocarnivoro.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-neutral-800 border border-neutral-700 text-amber-400 font-semibold py-3 px-6 rounded-lg hover:bg-neutral-700 hover:text-amber-300 transition-all"
+            >
+                Conheça a Keto Carnívora AI
+            </a>
+        </div>
         
         <button
           onClick={onRestart}
