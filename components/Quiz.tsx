@@ -35,20 +35,26 @@ const Quiz: React.FC<QuizProps> = ({ question, onAnswer, questionNumber, totalQu
         {question.options.map((option, index) => (
           <button
             key={index}
-            onClick={() => onAnswer(option)}
-            className="group w-full p-5 text-left rounded-xl border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300 relative overflow-hidden"
+            // Envia o título e a descrição combinados para o sistema de recomendação ter o contexto completo
+            onClick={() => onAnswer(`${option.title} - ${option.description}`)}
+            className="group w-full p-5 text-left rounded-xl border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300 relative overflow-hidden flex flex-col items-start"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between relative z-10">
-                <span className="text-lg font-medium text-neutral-200 group-hover:text-amber-400 transition-colors">
-                    {option}
+            
+            <div className="w-full flex items-center justify-between relative z-10 mb-1">
+                <span className="text-lg font-bold text-neutral-200 group-hover:text-amber-400 transition-colors">
+                    {option.title}
                 </span>
-                <span className="w-6 h-6 rounded-full border border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/20">
+                <span className="w-6 h-6 rounded-full border border-neutral-600 flex items-center justify-center group-hover:border-amber-500 group-hover:bg-amber-500/20 shrink-0 ml-3">
                     <svg className="w-3 h-3 text-transparent group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </span>
             </div>
+            
+            <p className="text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors relative z-10">
+                {option.description}
+            </p>
           </button>
         ))}
       </div>

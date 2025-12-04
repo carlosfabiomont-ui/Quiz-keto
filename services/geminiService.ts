@@ -2,14 +2,47 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { Question, Recommendation, QuestionWithAnswer } from '../types';
 
 /**
+ * Recupera a chave de API de forma segura em qualquer ambiente (Vite ou Node/Preview).
+ */
+function getApiKey(): string {
+  let apiKey = "";
+
+  // 1. Tenta recuperar do ambiente Vite (Produção/Vercel)
+  try {
+    // @ts-ignore
+    if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_KEY) {
+      // @ts-ignore
+      apiKey = import.meta.env.VITE_API_KEY;
+    }
+  } catch (e) {
+    // Ignora erros de acesso ao import.meta
+  }
+
+  // 2. Se não encontrou, tenta recuperar do ambiente Node (Preview/Local)
+  if (!apiKey) {
+    try {
+      // @ts-ignore
+      if (typeof process !== "undefined" && process.env && process.env.API_KEY) {
+        // @ts-ignore
+        apiKey = process.env.API_KEY;
+      }
+    } catch (e) {
+      // Ignora erros de acesso ao process
+    }
+  }
+
+  return apiKey;
+}
+
+/**
  * Creates and returns a GoogleGenAI client instance.
  */
 function getAiClient(): GoogleGenAI {
-  // @ts-ignore
-  const apiKey = import.meta.env.VITE_API_KEY;
+  const apiKey = getApiKey();
 
   if (!apiKey) {
-    throw new Error("API_KEY is not defined. Please check VITE_API_KEY in environment variables.");
+    // Mensagem de erro detalhada para ajudar no debug se necessário
+    throw new Error("API Key não encontrada. Verifique se VITE_API_KEY está configurada na Vercel.");
   }
   
   return new GoogleGenAI({ apiKey });
@@ -33,6 +66,11 @@ export async function generateQuizQuestions(): Promise<Question[]> {
       - Relação com a comida e cozinha (ex: prefere refeições rápidas, gosta de cozinhar, enjoa fácil da rotina).
       - Dificuldades enfrentadas em outras dietas (ex: falta de saciedade, vontade de doces, complexidade).
       
+      IMPORTANTE:
+      Para cada opção de resposta, forneça:
+      - "title": Um resumo curto e impactante da opção (Ex: "Sedentário", "Busco Praticidade").
+      - "description": Uma explicação empática em 1 frase (Ex: "Não pratico exercícios há mais de 6 meses", "Tenho pouco tempo para cozinhar").
+
       Gere perguntas engajadoras e diretas, em Português do Brasil.
       
       Retorne a resposta EXCLUSIVAMENTE como um array JSON de objetos, sem markdown.
@@ -51,7 +89,14 @@ export async function generateQuizQuestions(): Promise<Question[]> {
                         question: { type: Type.STRING },
                         options: {
                             type: Type.ARRAY,
-                            items: { type: Type.STRING }
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    title: { type: Type.STRING },
+                                    description: { type: Type.STRING }
+                                },
+                                required: ["title", "description"]
+                            }
                         },
                     },
                     required: ["question", "options"],
@@ -84,13 +129,13 @@ export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Prom
       Respostas do usuário: ${JSON.stringify(userAnswers)}.
 
       Regras:
-      - Se o usuário busca cura de doenças autoimunes ou simplicidade total, priorize o "Guia Definitivo: para iniciantes na dieta carnívora".
-      - Se busca emagrecimento estruturado ou gosta de alguns vegetais, priorize o "Guia de 21 dias de transformação keto".
-      - Se reclama de monotonia ou busca sabor, priorize o "80+ receitas keto".
+      - Se o usuário busca cura de doenças autoimunes, simplicidade total ou tem perfil "purista", priorize o "Guia Definitivo: para iniciantes na dieta carnívora".
+      - Se busca emagrecimento estruturado, gosta de alguns vegetais ou precisa de um "reset", priorize o "Guia de 21 dias de transformação keto".
+      - Se reclama de monotonia, busca sabor ou gosta de cozinhar ("gourmet"), priorize o "80+ receitas keto".
 
       Retorne um JSON com:
       - "recommendedProductTitle": O título EXATO de um dos 3 produtos acima.
-      - "reason": Uma explicação curta (2-3 frases), motivadora e personalizada em Português do Brasil.
+      - "reason": Uma explicação curta (2-3 frases), motivadora e personalizada em Português do Brasil, citando o motivo específico baseado no perfil dele.
 
       Retorne apenas o JSON.
     `;

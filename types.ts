@@ -1,6 +1,11 @@
+export interface QuizOption {
+  title: string;
+  description: string;
+}
+
 export interface Question {
   question: string;
-  options: string[];
+  options: QuizOption[];
 }
 
 export interface Product {
