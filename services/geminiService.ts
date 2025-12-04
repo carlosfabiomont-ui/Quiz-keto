@@ -3,14 +3,12 @@ import type { Question, Recommendation, QuestionWithAnswer } from '../types';
 
 /**
  * Creates and returns a GoogleGenAI client instance.
- * Throws an error if the API key is not found in the environment variables.
  */
 function getAiClient(): GoogleGenAI {
   const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
-    console.error("API_KEY is not defined. Make sure it's set in your environment variables.");
-    throw new Error("A chave da API não foi encontrada. Verifique as variáveis de ambiente.");
+    throw new Error("API_KEY is not defined.");
   }
   
   return new GoogleGenAI({ apiKey });
