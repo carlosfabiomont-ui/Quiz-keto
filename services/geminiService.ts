@@ -5,10 +5,11 @@ import type { Question, Recommendation, QuestionWithAnswer } from '../types';
  * Creates and returns a GoogleGenAI client instance.
  */
 function getAiClient(): GoogleGenAI {
-  const apiKey = process.env.API_KEY;
+  // @ts-ignore
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   if (!apiKey) {
-    throw new Error("API_KEY is not defined.");
+    throw new Error("API_KEY is not defined. Please check VITE_API_KEY in environment variables.");
   }
   
   return new GoogleGenAI({ apiKey });
@@ -61,7 +62,7 @@ export async function generateQuizQuestions(): Promise<Question[]> {
 
     try {
         // Limpeza de segurança: remove crases de markdown caso a IA as envie (ex: ```json ... ```)
-        const jsonText = response.text.replace(/```json|```/g, '').trim();
+        const jsonText = response.text ? response.text.replace(/```json|```/g, '').trim() : "[]";
         const questions = JSON.parse(jsonText);
         return questions as Question[];
     } catch (e) {
@@ -112,7 +113,7 @@ export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Prom
 
     try {
         // Limpeza de segurança: remove crases de markdown caso a IA as envie
-        const jsonText = response.text.replace(/```json|```/g, '').trim();
+        const jsonText = response.text ? response.text.replace(/```json|```/g, '').trim() : "{}";
         const recommendation = JSON.parse(jsonText);
         return recommendation as Recommendation;
     } catch (e) {
