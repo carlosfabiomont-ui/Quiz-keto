@@ -100,6 +100,7 @@ const App: React.FC = () => {
       case 'in-progress':
         return (
           <Quiz
+            key={currentQuestionIndex}
             question={questions[currentQuestionIndex]}
             onAnswer={handleAnswer}
             questionNumber={currentQuestionIndex + 1}

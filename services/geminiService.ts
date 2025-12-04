@@ -32,8 +32,10 @@ export async function generateQuizQuestions(): Promise<Question[]> {
 
       As perguntas devem investigar:
       - Nível de experiência com dietas low-carb (a primeira pergunta DEVE abordar a experiência tanto com Keto quanto com Carnívora).
-      - Principal objetivo (ex: cura autoimune, perda de peso rápida, variedade alimentar).
-      - Preferência por tipos de alimentos (só carne, carne + vegetais, receitas elaboradas).
+      - Principal objetivo (ex: perda de peso, melhora de saúde autoimune, mais energia, variedade alimentar).
+      - Estilo de vida atual, incluindo nível de atividade física (ex: sedentário, ativo, há quanto tempo não treina).
+      - Relação com a comida e cozinha (ex: prefere refeições rápidas, gosta de cozinhar, enjoa fácil da rotina).
+      - Dificuldades enfrentadas em outras dietas (ex: falta de saciedade, vontade de doces, complexidade).
       
       Gere perguntas engajadoras e diretas, em Português do Brasil.
       
