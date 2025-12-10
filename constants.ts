@@ -6,7 +6,7 @@ export const PRODUCTS: Product[] = [
     title: 'Guia Definitivo: para iniciantes na dieta carnívora',
     description: 'O passo a passo definitivo para você começar a dieta carnívora com segurança, evitar erros comuns e transformar sua saúde.',
     imageUrl: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=1000&auto=format&fit=crop', // Steak image
-    link: 'https://ketocarnivoro.com/guia-iniciante/',
+    link: 'https://pv.guia-iniciante.ketocarnivoro.com/',
   },
   {
     id: 'keto-transformation-21',
