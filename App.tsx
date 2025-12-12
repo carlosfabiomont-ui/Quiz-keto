@@ -5,8 +5,30 @@ import { PRODUCTS } from './constants';
 import Quiz from './components/Quiz';
 import Result from './components/Result';
 import LoadingSpinner from './components/LoadingSpinner';
+import AnalyzingLoader from './components/AnalyzingLoader';
+import EmailCapture from './components/EmailCapture';
 
-type QuizState = 'start' | 'in-progress' | 'finished';
+// Extendendo o Window para suportar fbq
+declare global {
+  interface Window {
+    fbq: any;
+  }
+}
+
+// Função auxiliar para disparar Pixel (segura contra erros)
+const trackPixelEvent = (eventName: string, data?: any) => {
+  try {
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', eventName, data);
+    } else {
+      console.log(`[Pixel Simulated] Event: ${eventName}`, data);
+    }
+  } catch (e) {
+    console.warn('Pixel Error', e);
+  }
+};
+
+type QuizState = 'start' | 'in-progress' | 'analyzing' | 'email-capture' | 'finished';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -17,11 +39,14 @@ const App: React.FC = () => {
   const [recommendedProduct, setRecommendedProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // PageView tracking is now handled in index.html to ensure early firing
 
   const handleStartQuiz = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
+      trackPixelEvent('ViewContent', { content_name: 'Quiz Start' }); // Pixel Start
       const fetchedQuestions = await generateQuizQuestions();
       setQuestions(fetchedQuestions);
       setQuizState('in-progress');
@@ -42,22 +67,47 @@ const App: React.FC = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
     } else {
-      setIsLoading(true);
-      setQuizState('finished');
+      // Finalizou as perguntas
+      setQuizState('analyzing'); // Mostra a barra de progresso fake
+      
       try {
+        // Dispara a IA em background
         const fullQuestions = questions.map((q, i) => ({ question: q.question, answer: newAnswers[i] }));
-        const result = await getRecommendation(fullQuestions);
+        const aiPromise = getRecommendation(fullQuestions);
+        
+        // Garante que a animação de "Analisando" rode por pelo menos 3 segundos para valorizar o processo
+        const timerPromise = new Promise(resolve => setTimeout(resolve, 3500));
+
+        const [result] = await Promise.all([aiPromise, timerPromise]);
+        
         setRecommendation(result);
         const product = PRODUCTS.find(p => p.title.toLowerCase() === result.recommendedProductTitle.toLowerCase());
         setRecommendedProduct(product || null);
+        
+        // Vai para a captura de email
+        setQuizState('email-capture');
+        
       } catch (err) {
         setError('Desculpe, não foi possível gerar sua recomendação. Tente novamente.');
         console.error(err);
-      } finally {
-        setIsLoading(false);
+        setQuizState('start'); // Volta para o inicio em erro critico
       }
     }
   }, [answers, currentQuestionIndex, questions]);
+
+  const handleEmailSubmit = (email: string) => {
+    // Aqui você enviaria o email para seu CRM/Autoresponder
+    console.log("Email capturado:", email);
+    
+    // Dispara Pixel de Lead
+    trackPixelEvent('Lead', { 
+      content_name: recommendedProduct?.title,
+      currency: 'BRL',
+      value: 0 
+    });
+
+    setQuizState('finished');
+  };
 
   const handleRestart = useCallback(() => {
     setQuizState('start');
@@ -70,12 +120,12 @@ const App: React.FC = () => {
   }, []);
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading && quizState === 'start') {
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
           <LoadingSpinner />
-          <p className="mt-6 text-amber-500 font-medium animate-pulse">
-            {quizState === 'start' ? 'Preparando suas perguntas...' : 'Analisando seu perfil...'}
+          <p className="mt-6 text-amber-500 font-medium animate-pulse text-lg tracking-wide">
+            Iniciando diagnóstico...
           </p>
         </div>
       );
@@ -107,9 +157,28 @@ const App: React.FC = () => {
             totalQuestions={questions.length}
           />
         );
+      case 'analyzing':
+        return <AnalyzingLoader />;
+      case 'email-capture':
+        return <EmailCapture onSubmit={handleEmailSubmit} />;
       case 'finished':
         if (recommendedProduct && recommendation) {
-          return <Result product={recommendedProduct} reason={recommendation.reason} onRestart={handleRestart} />;
+          return (
+            <div onClick={() => {
+                 // Rastreia clique de compra/interesse
+                 trackPixelEvent('InitiateCheckout', { 
+                    content_name: recommendedProduct.title,
+                    content_ids: [recommendedProduct.id] 
+                 });
+            }}>
+                <Result 
+                    product={recommendedProduct} 
+                    reason={recommendation.reason} 
+                    archetype={recommendation.archetype}
+                    onRestart={handleRestart} 
+                />
+            </div>
+          );
         }
         return null;
       case 'start':
@@ -143,20 +212,21 @@ const App: React.FC = () => {
                  </div>
               </div>
               
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                Descubra o Guia Ideal Para Sua Evolução
+              <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-4">
+                Descubra o Seu Arquétipo Metabólico
               </h2>
               
               <p className="text-lg text-neutral-400 mb-10 leading-relaxed max-w-2xl mx-auto">
-                Quer emagrecer com a <strong>Keto</strong>? Mudar radicalmente com a <strong>Carnívora</strong>? Ou busca <strong>Receitas</strong> saborosas?
-                <br className="hidden md:block"/> Responda ao quiz oficial e receba sua recomendação personalizada.
+                Qual estratégia Carnívora destrava a queima de gordura no <strong>SEU</strong> corpo?
+                <br className="hidden md:block mt-2"/> 
+                Responda a 7 perguntas rápidas e receba um plano de ação personalizado para o seu perfil biológico.
               </p>
               
               <button
                 onClick={handleStartQuiz}
                 className="group relative inline-flex items-center justify-center px-12 py-5 text-lg font-bold text-black transition-all duration-200 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105"
               >
-                <span>COMEÇAR QUIZ</span>
+                <span>DESCOBRIR MEU PLANO</span>
                 <svg className="w-5 h-5 ml-2 -mr-1 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
               </button>
               

@@ -18,7 +18,8 @@ export interface Product {
 
 export interface Recommendation {
     recommendedProductTitle: string;
-    reason: string;
+    archetype: string; // Novo campo para o título do Arquétipo
+    reason: string; // O script de VSL
 }
 
 export interface QuestionWithAnswer {

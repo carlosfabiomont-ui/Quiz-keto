@@ -22,4 +22,11 @@ export const PRODUCTS: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1544025162-d76690b60943?q=80&w=1000&auto=format&fit=crop', // Ribs/Food
     link: 'https://ketocarnivoro.com/40-receitas/',
   },
+  {
+    id: 'air-fryer-recipes',
+    title: '80+ Receitas para Air Fryer',
+    description: 'Praticidade, crocância e zero sujeira. Descubra como fazer refeições Keto e Carnívoras incríveis usando apenas sua Air Fryer.',
+    imageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=1000&auto=format&fit=crop', // Fried Chicken/Air Fryer vibe
+    link: 'https://pv.80-air-fryer.ketocarnivoro.com/',
+  },
 ];
