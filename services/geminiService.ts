@@ -106,31 +106,38 @@ export async function generateQuizQuestions(): Promise<Question[]> {
 export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Promise<Recommendation> {
     const ai = getAiClient();
     const prompt = `
-      Você é o "Algoritmo de Diagnóstico Metabólico" da página @keto_carnivoras_news.
-      Analise as respostas do usuário e determine o ARQUÉTIPO dele e o PRODUTO IDEAL baseando-se na seguinte Lógica de Pontuação (Scoring Logic):
+      Você é um Especialista Sênior em Dieta Carnívora e Copywriter de Resposta Direta.
+      Analise as respostas do usuário e determine o ARQUÉTIPO dele e o PRODUTO IDEAL.
+      
+      IMPORTANTE: O texto de "reason" (a razão) deve seguir a estrutura:
+      1. DOR (Identifique o problema principal dele).
+      2. AGITAÇÃO (Mostre que se ele não resolver isso, vai falhar).
+      3. SOLUÇÃO (Apresente o produto recomendado como a ÚNICA solução lógica).
+      
+      Mantenha o tom empático, mas firme. Use palavras como "estratégia", "protocolo", "destravar".
 
       OS PRODUTOS E ARQUÉTIPOS:
       
       1. PRODUTO: "80+ Receitas para Air Fryer"
          ARQUÉTIPO: "O CARNÍVORO PRAGMÁTICO"
-         GATILHOS: Respondeu "Tempo e Bagunça", "Praticidade Máxima", "Economia e Tempo". Odeia sujeira, quer rapidez.
+         GATILHOS: Tempo, Bagunça, Praticidade, Odeia limpar fogão.
       
       2. PRODUTO: "Guia de 21 dias de transformação keto"
          ARQUÉTIPO: "O BUSCADOR DE REINÍCIO"
-         GATILHOS: Respondeu "Falta de Clareza", "Preciso de Regras", "Desinflamar e Vícios". Precisa de um mapa, um desafio, estrutura rígida.
+         GATILHOS: Falta de Clareza, Precisa de Regras, Desinflamar, Vícios.
 
       3. PRODUTO: "80+ receitas keto"
          ARQUÉTIPO: "O HEDONISTA ESTRATÉGICO"
-         GATILHOS: Respondeu "Paladar Monótono", "Cozinheiro Criativo", "Social e Família", "Veterano". Sente falta de variedade, gosta de cozinhar.
+         GATILHOS: Paladar Monótono, Criativo, Família, Tédio alimentar.
 
       4. PRODUTO: "Guia Definitivo: para iniciantes na dieta carnívora"
          ARQUÉTIPO: "O INICIANTE CONSCIENTE"
-         GATILHOS: Respondeu "Totalmente iniciante" E demonstra insegurança ou busca conhecimento profundo antes da prática. É o "Purista" que quer fazer certo desde o dia 1 para evitar erros.
+         GATILHOS: Iniciante, Medo de errar, Busca segurança, Quer passo a passo.
 
       CRITÉRIOS DE DESEMPATE (TIE-BREAKER):
-      - Prioridade 1: "Guia de 21 dias" (Se o usuário quer estrutura/desafio).
-      - Prioridade 2: "80+ Receitas para Air Fryer" (Se o usuário quer praticidade).
-      - Prioridade 3: "80+ receitas keto" (Apenas se reclamar de tédio ou gostar de cozinhar).
+      - Prioridade 1: "Guia de 21 dias" (Se quer estrutura).
+      - Prioridade 2: "80+ Receitas para Air Fryer" (Se quer praticidade).
+      - Prioridade 3: "Guia Definitivo" (Se é muito iniciante).
 
       RESPOSTAS DO USUÁRIO: ${JSON.stringify(userAnswers)}
 
@@ -138,21 +145,21 @@ export async function getRecommendation(userAnswers: QuestionWithAnswer[]): Prom
       Retorne um JSON com:
       - "recommendedProductTitle": O título exato do produto vencedor.
       - "archetype": O nome do Arquétipo (ex: "O CARNÍVORO PRAGMÁTICO").
-      - "reason": Um texto persuasivo no estilo VSL (Video Sales Letter). Use os scripts abaixo como base, mas personalize levemente com os dados do usuário (idade, gênero, meta) se possível.
+      - "reason": O texto persuasivo (aprox 40-50 palavras). Seja direto. Fale diretamente com o usuário ("Você...").
 
-      SCRIPTS BASE PARA O CAMPO "REASON":
+      SCRIPTS BASE PARA O CAMPO "REASON" (ADAPTE PARA SER MAIS PERSUASIVO):
 
       [Se Air Fryer]:
-      "O nosso algoritmo analisou suas respostas e identificou um padrão muito comum. Você quer os benefícios da dieta — a clareza mental, a queima de gordura — mas a rotina de preparo está te sabotando. Você indicou que tem pouco tempo ou odeia a bagunça da cozinha. A boa notícia: seu problema não é falta de disciplina, é falta de tecnologia. Tentar fazer dieta usando frigideira todos os dias é insustentável para você. Por isso, a solução é a Automação: Picanha crocante e torresmo em 12 minutos, sem sujeira."
+      "Identifiquei que sua maior barreira não é a dieta, é a LOGÍSTICA. Você quer os benefícios, mas a bagunça e o tempo na cozinha estão drenando sua energia. Se você depender de fritar bifes todo dia, vai desistir em uma semana. A solução para o seu perfil 'Pragmático' é a automação. Com este guia de Air Fryer, você elimina a sujeira e garante refeições perfeitas em 12 minutos."
 
       [Se 21 Dias]:
-      "Vi nas suas respostas que você se sente perdido com tanta informação contraditória. O excesso de informação causa paralisia. Para o seu tipo metabólico, tentar 'inventar moda' agora é um erro. Você precisa de Blindagem. Você precisa de um período curto e guiado para resetar seus hormônios. O Desafio 21 Dias não é um livro, é um sistema. Eu vou te dizer exatamente o que comer e quando comer. Seu único trabalho é obedecer ao mapa."
+      "Você está sofrendo de 'Paralisia por Análise'. Tentar juntar dicas soltas da internet está te deixando confuso e ansioso. Seu metabolismo precisa de um 'Reset' urgente, mas sem adivinhação. O Desafio 21 Dias não é um livro, é um Protocolo de Choque. Pare de tentar descobrir o que fazer e apenas siga o mapa que desenhei para destravar sua queima de gordura em 3 semanas."
 
       [Se 80 Receitas Keto]:
-      "Sua análise mostra algo interessante: você já entende o poder da alimentação, mas seu paladar está entediado. Cuidado: o tédio é o maior assassino de dietas. Se você continuar comendo bife sem graça todo dia, você vai chutar o balde. Para blindar sua dieta, você precisa de Prazer. Você precisa enganar seu cérebro achando que está 'jacando', quando na verdade está nutrindo. Transforme sua obrigação em banquete com Lasanhas e Pães que funcionam na dieta."
+      "Cuidado: O tédio é o assassino silencioso da sua dieta. Sua análise mostra que comer a mesma coisa todo dia vai fazer você chutar o balde e voltar ao açúcar. Você precisa de PRAZER estratégico. Este livro de receitas é sua apólice de seguro contra a desistência, permitindo que você coma 'pães' e 'lasanhas' que na verdade aceleram seu emagrecimento."
 
       [Se Guia Iniciantes]:
-      "Sua análise indica que você está pronto para uma mudança real, mas quer fazer isso com segurança absoluta. Você não quer apenas 'tentar' mais uma dieta; você quer entender os fundamentos para não colocar sua saúde em risco. O Guia Definitivo é a base sólida que falta para você. Ele elimina as suposições e te dá o passo a passo científico para começar a Dieta Carnívora evitando os erros que 90% dos iniciantes cometem nos primeiros 15 dias."
+      "Você está pronto para mudar, mas tem medo de errar e prejudicar sua saúde. E você está certo: começar a Carnívora sem o protocolo correto de eletrólitos e adaptação pode ser perigoso. Não arrisque seu bem-estar com tentativas e erros. O Guia Definitivo é a base de segurança que você precisa para passar pela fase de adaptação sem sintomas ruins e colher os benefícios reais."
     `;
 
     const response = await ai.models.generateContent({
