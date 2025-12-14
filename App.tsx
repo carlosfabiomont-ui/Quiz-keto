@@ -6,7 +6,6 @@ import Quiz from './components/Quiz';
 import Result from './components/Result';
 import LoadingSpinner from './components/LoadingSpinner';
 import AnalyzingLoader from './components/AnalyzingLoader';
-import EmailCapture from './components/EmailCapture';
 
 // Extendendo o Window para suportar fbq
 declare global {
@@ -28,7 +27,7 @@ const trackPixelEvent = (eventName: string, data?: any) => {
   }
 };
 
-type QuizState = 'start' | 'in-progress' | 'analyzing' | 'email-capture' | 'finished';
+type QuizState = 'start' | 'in-progress' | 'analyzing' | 'finished';
 
 const App: React.FC = () => {
   const [quizState, setQuizState] = useState<QuizState>('start');
@@ -84,8 +83,15 @@ const App: React.FC = () => {
         const product = PRODUCTS.find(p => p.title.toLowerCase() === result.recommendedProductTitle.toLowerCase());
         setRecommendedProduct(product || null);
         
-        // Vai para a captura de email
-        setQuizState('email-capture');
+        // Dispara Pixel de Lead/Conclusão aqui, já que não temos mais captura de email
+        trackPixelEvent('Lead', { 
+            content_name: product?.title || result.recommendedProductTitle,
+            currency: 'BRL',
+            value: 0 
+        });
+        
+        // Vai direto para o resultado (Página de Vendas Intermediária)
+        setQuizState('finished');
         
       } catch (err) {
         setError('Desculpe, não foi possível gerar sua recomendação. Tente novamente.');
@@ -94,20 +100,6 @@ const App: React.FC = () => {
       }
     }
   }, [answers, currentQuestionIndex, questions]);
-
-  const handleEmailSubmit = (email: string) => {
-    // Aqui você enviaria o email para seu CRM/Autoresponder
-    console.log("Email capturado:", email);
-    
-    // Dispara Pixel de Lead
-    trackPixelEvent('Lead', { 
-      content_name: recommendedProduct?.title,
-      currency: 'BRL',
-      value: 0 
-    });
-
-    setQuizState('finished');
-  };
 
   const handleRestart = useCallback(() => {
     setQuizState('start');
@@ -159,8 +151,6 @@ const App: React.FC = () => {
         );
       case 'analyzing':
         return <AnalyzingLoader />;
-      case 'email-capture':
-        return <EmailCapture onSubmit={handleEmailSubmit} />;
       case 'finished':
         if (recommendedProduct && recommendation) {
           return (
