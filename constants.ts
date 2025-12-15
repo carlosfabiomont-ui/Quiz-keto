@@ -13,7 +13,7 @@ export const PRODUCTS: Product[] = [
     title: 'Guia de 21 dias de transformação keto',
     description: 'Um desafio estruturado de 3 semanas para virar a chave do seu metabolismo, queimar gordura e recuperar sua vitalidade.',
     imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1000&auto=format&fit=crop', // Keto breakfast
-    link: 'https://ketocarnivoro.com/21-dias-ceto/',
+    link: 'https://pv.21.dias.trans.ketocarnivoro.com/',
   },
   {
     id: 'keto-carnivore-recipes',
