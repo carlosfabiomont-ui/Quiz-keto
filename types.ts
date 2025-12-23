@@ -4,6 +4,7 @@ export interface QuizOption {
 }
 
 export interface Question {
+  category: string;
   question: string;
   options: QuizOption[];
 }
@@ -18,11 +19,12 @@ export interface Product {
 
 export interface Recommendation {
     recommendedProductTitle: string;
-    archetype: string; // Novo campo para o título do Arquétipo
-    reason: string; // O script de VSL
+    archetype: string;
+    reason: string;
 }
 
 export interface QuestionWithAnswer {
+  category: string;
   question: string;
   answer: string;
 }
